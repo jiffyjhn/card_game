@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct card_gameApp: App {
+    @StateObject private var currentPlayerCards=cards()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().environmentObject(currentPlayerCards)
         }
     }
 }
