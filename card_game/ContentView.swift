@@ -138,8 +138,8 @@ struct currentCardsView: View{
 
     
 struct CardCompareView: View{
-    @State var playerCardString:String
-    @State var cpuCardString:String
+    @Binding var playerCardString:String
+    @Binding var cpuCardString:String
     var body: some View {
         HStack(){
             Spacer()
@@ -155,8 +155,8 @@ struct DealButtonView: View{
     @EnvironmentObject var currentDecks:cards
     @State var playerCard = 0
     @State var cpuCard = 0
-    @State var playerCardString:String
-    @State var cpuCardString:String
+    @Binding var playerCardString:String
+    @Binding var cpuCardString:String
     @State var playerScore = 0
     @State var cpuScore = 0
     func deal(){
@@ -206,10 +206,10 @@ struct NewGameButtonView: View{
     @EnvironmentObject var currentDecks:cards
     @State var playerCard = 0
     @State var cpuCard = 0
-    @State var playerCardString:String
-    @State var cpuCardString:String
-    @State var playerScore = 0
-    @State var cpuScore = 0
+    @Binding var playerCardString:String
+    @Binding var cpuCardString:String
+    @Binding var playerScore:Int
+    @Binding var cpuScore:Int
     func initCards(){
         let cardValues:[Int] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         var allCards:[Int] = []
@@ -244,8 +244,7 @@ struct NewGameButtonView: View{
 
 
 struct scoreView: View{
-    @State private var playerScore = 0
-    @State private var cpuScore = 0
+    @ObservedObject var currentDecks:cards
     var body: some View{
         HStack(){
             Spacer()
@@ -254,7 +253,7 @@ struct scoreView: View{
                     .fontWeight(.bold)
                     .foregroundColor(Color.white)
                     .padding(.bottom, 10.0)
-                Text(String(playerScore))
+                Text(String(currentDecks.playerCardList.count))
                     .font(.headline)
                     .foregroundColor(Color.white)
             }
@@ -264,7 +263,7 @@ struct scoreView: View{
                     .font(.headline)
                     .foregroundColor(Color.white)
                     .padding(.bottom, 10.0)
-                Text(String(cpuScore))
+                Text(String(currentDecks.cpuCardList.count))
                     .font(.headline)
                     .foregroundColor(Color.white)
             }
@@ -274,172 +273,39 @@ struct scoreView: View{
 }
 
 struct GameView: View{
-    @State private var playerCard = 0
-    @State private var cpuCard = 0
-    @State private var playerCardString = "card5"
-    @State private var cpuCardString = "card9"
-    @State private var playerScore = 0
-    @State private var cpuScore = 0
+    @State var playerCard = 0
+    @State var cpuCard = 0
+    @State var playerCardString = "card5"
+    @State var cpuCardString = "card9"
+    @State var playerScore=0
+    @State var cpuScore=0
     @EnvironmentObject var currentDecks:cards
 
+    
     var body: some View {
         ZStack{
             Image("background").ignoresSafeArea()
             VStack(){
                 Image("logo")
                 Spacer()
-                CardCompareView(playerCardString: playerCardString, cpuCardString: cpuCardString)
-                NewGameButtonView(playerCardString: playerCardString, cpuCardString: cpuCardString)
+                CardCompareView(playerCardString: $playerCardString, cpuCardString: $cpuCardString)
+                NewGameButtonView(playerCardString: $playerCardString, cpuCardString: $cpuCardString, playerScore:$playerScore, cpuScore:$cpuScore)
                 NavigationLink(destination: currentCardsView(background: Image("background")), label: {
                     Text("CurrentCards")
                         .foregroundColor(Color.white)
                         .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                 })
-                DealButtonView(playerCardString:playerCardString , cpuCardString: playerCardString)
+                DealButtonView(playerCardString:$playerCardString , cpuCardString: $cpuCardString)
                 Spacer()
-                scoreView()
+                scoreView(currentDecks:currentDecks)
                 Spacer()
             }
         }
     }
 }
 
-
-//struct GameView: View{
-//    @State private var playerCard = 0
-//    @State private var cpuCard = 0
-//    @State private var playerCardString = "card5"
-//    @State private var cpuCardString = "card9"
-//    @State private var playerScore = 0
-//    @State private var cpuScore = 0
-//    @EnvironmentObject var currentDecks:cards
-//
-//    func initCards(){
-//        let cardValues:[Int] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-//        var allCards:[Int] = []
-//        for cardValue in cardValues{
-//            allCards = allCards + Array(repeating:cardValue, count:4)
-//            allCards = allCards.shuffled()
-//        }
-//        currentDecks.playerCardList = Array(allCards[0...25])
-//        currentDecks.cpuCardList = Array(allCards[26...])
-//        print("initial currentPlayerCards.cardList:\(currentDecks.playerCardList)")
-//        print("initial currentCPUCards.cardList:\(currentDecks.cpuCardList)")
-//
-//        playerScore = currentDecks.playerCardList.count
-//        cpuScore = currentDecks.cpuCardList.count
-//        playerCard = currentDecks.playerCardList.first!
-//        cpuCard = currentDecks.cpuCardList.first!
-//        playerCardString = "card"+String(playerCard)
-//        cpuCardString = "card"+String(cpuCard)
-//    }
-//    func deal(){
-//        playerCard = currentDecks.playerCardList.removeFirst()
-//        cpuCard = currentDecks.cpuCardList.removeFirst()
-//        playerCardString = "card"+String(playerCard)
-//        cpuCardString = "card"+String(cpuCard)
-//    }
-//
-    
-    
-    
-    
-    
-//    var body: some View {
-//        ZStack{
-//            Image("background").ignoresSafeArea()
-//            VStack(){
-////                Spacer()
-//                Image("logo")
-//                Spacer()
-//                HStack(){
-//                    Spacer()
-//                    Image(playerCardString)
-//                    Spacer()
-//                    Image(cpuCardString)
-//                    Spacer()
-//
-//                }
-//                Button(action: {
-//                    initCards()
-//                }, label: {
-//                    Text("NEW GAME")
-//                        .fontWeight(.heavy)
-//                        .foregroundColor(Color.white)
-//                        .padding(.vertical, 12.0)
-//                })
-////                Spacer()  // why error when this is added?
-//
-//                NavigationLink(destination: currentCardsView(background: Image("background")), label: {
-//                    Text("CurrentCards")
-//                        .foregroundColor(Color.white)
-//                        .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-//                })
-//
-//                Button(action: {
-//                    //
-//                    deal()
-//                    print("playerCard:\(playerCard)")
-//                    print("cpuCard:\(cpuCard)")
-//
-//                    if playerCard>cpuCard {
-//                        print("player card greater")
-//                        currentDecks.playerCardList.append(playerCard)
-//                        currentDecks.playerCardList.append(cpuCard)
-//
-//                    }
-//                    else if cpuCard>playerCard {
-//                        print("cpu card greater")
-//
-//                        currentDecks.cpuCardList.append(playerCard)
-//                        currentDecks.cpuCardList.append(cpuCard)
-//                    }
-//                    else{
-//                        print("they are equal")
-//                        currentDecks.playerCardList.append(playerCard)
-//                        currentDecks.cpuCardList.append(playerCard)
-//                    }
-//                    playerScore=currentDecks.playerCardList.count
-//                    cpuScore=currentDecks.cpuCardList.count
-//                    print("currentPlayerCards.cardList:\(currentDecks.playerCardList)")
-//                    print("currentCPUCards.cardList:\(currentDecks.cpuCardList)")
-//                    print("playerScore:\(playerScore)")
-//                    print("cpuScore:\(cpuScore)")
-//                    //update score
-//                }, label: {
-//                    Image("dealbutton")
-//                })
-//                Spacer()
-//                HStack(){
-//                    Spacer()
-//                    VStack(){
-//                        Text("Player")
-//                            .fontWeight(.bold)
-//                            .foregroundColor(Color.white)
-//                            .padding(.bottom, 10.0)
-//                        Text(String(playerScore))
-//                            .font(.headline)
-//                            .foregroundColor(Color.white)
-//                    }
-//                    Spacer()
-//                    VStack(){
-//                        Text("CPU")
-//                            .font(.headline)
-//                            .foregroundColor(Color.white)
-//                            .padding(.bottom, 10.0)
-//                        Text(String(cpuScore))
-//                            .font(.headline)
-//                            .foregroundColor(Color.white)
-//                    }
-//                    Spacer()
-//                }
-//                Spacer()
-//            }
-//        }
-//    }
-//}
-
 struct ContentView: View {
+    @EnvironmentObject var currentDecks:cards
     var body: some View {
         NavigationView{
             GameView()
