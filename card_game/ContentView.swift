@@ -153,12 +153,12 @@ struct CardCompareView: View{
     
 struct DealButtonView: View{
     @EnvironmentObject var currentDecks:cards
-    @State var playerCard = 0
-    @State var cpuCard = 0
+    @State private var playerCard = 0
+    @State private var cpuCard = 0
     @Binding var playerCardString:String
     @Binding var cpuCardString:String
-    @State var playerScore = 0
-    @State var cpuScore = 0
+    @State private var playerScore = 0
+    @State private var cpuScore = 0
     func deal(){
         playerCard = currentDecks.playerCardList.removeFirst()
         cpuCard = currentDecks.cpuCardList.removeFirst()
@@ -204,8 +204,8 @@ struct DealButtonView: View{
 
 struct NewGameButtonView: View{
     @EnvironmentObject var currentDecks:cards
-    @State var playerCard = 0
-    @State var cpuCard = 0
+    @State private var playerCard = 0
+    @State private var cpuCard = 0
     @Binding var playerCardString:String
     @Binding var cpuCardString:String
     @Binding var playerScore:Int
@@ -273,12 +273,12 @@ struct scoreView: View{
 }
 
 struct GameView: View{
-    @State var playerCard = 0
-    @State var cpuCard = 0
-    @State var playerCardString = "card5"
-    @State var cpuCardString = "card9"
-    @State var playerScore=0
-    @State var cpuScore=0
+    @State private var playerCard = 0
+    @State private var cpuCard = 0
+    @State private var playerCardString = "card5"
+    @State private var cpuCardString = "card9"
+    @State private var playerScore=0
+    @State private var cpuScore=0
     @EnvironmentObject var currentDecks:cards
 
     
