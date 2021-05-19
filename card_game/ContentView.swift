@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 
 
@@ -63,44 +64,8 @@ struct CardView: View{
     }
 }
 
-
-struct CardsView: View{
-    @EnvironmentObject var currentDecks:cards
-    func shuffle(){
-        currentDecks.playerCardList = currentDecks.playerCardList.shuffled()
-    }
-    @State private var startPosition = 0
-    var body: some View{
-        let cardRows = Array(currentDecks.playerCardList).chunked(into: 5)
-        ZStack{
-            Image("background").ignoresSafeArea()
-            VStack{
-                Spacer()
-                Button(action: {
-                    shuffle()
-                }, label: {Text("SHUFFLE CARDS")
-                        .font(.headline)
-                        .fontWeight(.heavy)
-                        .foregroundColor(Color.white)
-                    .padding(.vertical, 12.0)})
-                Spacer()
-                ForEach(0...cardRows.count-1, id: \.self) {index2 in
-                    HStack{
-                        ForEach(0...cardRows[index2].count-1, id: \.self) { index in
-                            CardView(cardNumber:cardRows[index2][index])
-                        }.stacked(at:index2, in:cardRows.count, for: "vertical")
-                    }
-                }
-                Spacer()
-            }
-        }
-    }
-}
-
-
-
 struct currentCardsView: View{
-        @EnvironmentObject var currentDecks:cards
+        @ObservedObject var currentDecks:cards
         var background: Image
         func shuffle(){
             currentDecks.playerCardList = currentDecks.playerCardList.shuffled()
@@ -152,13 +117,13 @@ struct CardCompareView: View{
 }
     
 struct DealButtonView: View{
-    @EnvironmentObject var currentDecks:cards
-    @State private var playerCard = 0
-    @State private var cpuCard = 0
+    @ObservedObject var currentDecks:cards
+    @Binding var playerCard:Int
+    @Binding var cpuCard:Int
     @Binding var playerCardString:String
     @Binding var cpuCardString:String
-    @State private var playerScore = 0
-    @State private var cpuScore = 0
+    @Binding var playerScore:Int
+    @Binding var cpuScore:Int
     func deal(){
         playerCard = currentDecks.playerCardList.removeFirst()
         cpuCard = currentDecks.cpuCardList.removeFirst()
@@ -203,9 +168,9 @@ struct DealButtonView: View{
 }
 
 struct NewGameButtonView: View{
-    @EnvironmentObject var currentDecks:cards
-    @State private var playerCard = 0
-    @State private var cpuCard = 0
+    @ObservedObject var currentDecks:cards
+    @Binding var playerCard:Int
+    @Binding var cpuCard:Int
     @Binding var playerCardString:String
     @Binding var cpuCardString:String
     @Binding var playerScore:Int
@@ -279,9 +244,8 @@ struct GameView: View{
     @State private var cpuCardString = "card9"
     @State private var playerScore=0
     @State private var cpuScore=0
-    @EnvironmentObject var currentDecks:cards
+    @ObservedObject var currentDecks:cards
 
-    
     var body: some View {
         ZStack{
             Image("background").ignoresSafeArea()
@@ -289,13 +253,13 @@ struct GameView: View{
                 Image("logo")
                 Spacer()
                 CardCompareView(playerCardString: $playerCardString, cpuCardString: $cpuCardString)
-                NewGameButtonView(playerCardString: $playerCardString, cpuCardString: $cpuCardString, playerScore:$playerScore, cpuScore:$cpuScore)
-                NavigationLink(destination: currentCardsView(background: Image("background")), label: {
+                NewGameButtonView(currentDecks: currentDecks, playerCard: $playerCard, cpuCard: $cpuCard, playerCardString: $playerCardString, cpuCardString: $cpuCardString, playerScore: $playerScore, cpuScore: $cpuScore)
+                NavigationLink(destination: currentCardsView(currentDecks:currentDecks, background: Image("background")), label: {
                     Text("CurrentCards")
                         .foregroundColor(Color.white)
                         .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                 })
-                DealButtonView(playerCardString:$playerCardString , cpuCardString: $cpuCardString)
+                DealButtonView(currentDecks: currentDecks, playerCard: $playerCard, cpuCard: $cpuCard, playerCardString: $playerCardString, cpuCardString: $cpuCardString, playerScore: $playerScore, cpuScore: $cpuScore)
                 Spacer()
                 scoreView(currentDecks:currentDecks)
                 Spacer()
@@ -308,7 +272,7 @@ struct ContentView: View {
     @EnvironmentObject var currentDecks:cards
     var body: some View {
         NavigationView{
-            GameView()
+            GameView(currentDecks:currentDecks)
         }
     }
 }
