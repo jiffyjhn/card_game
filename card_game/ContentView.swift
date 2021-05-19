@@ -8,8 +8,6 @@
 import SwiftUI
 import Combine
 
-
-
 extension View {
     func stacked(at position: Int, in total: Int, for axis:String) -> some View{
         let offset = CGFloat(total - position)
@@ -52,6 +50,55 @@ extension Image {
 class cards: ObservableObject {
     @Published var playerCardList:[Int] = []
     @Published var cpuCardList:[Int] = []
+    @Published var playerCard:Int = 0
+    @Published var cpuCard:Int = 0
+    
+    func shuffle(){
+        playerCardList = playerCardList.shuffled()
+    }
+    func deal(){
+        playerCard = playerCardList.removeFirst()
+        cpuCard = cpuCardList.removeFirst()
+        
+        print("playerCard:\(playerCard)")
+        print("cpuCard:\(cpuCard)")
+
+        if playerCard>cpuCard {
+            print("player card greater")
+            playerCardList.append(playerCard)
+            playerCardList.append(cpuCard)
+
+        }
+        else if cpuCard>playerCard {
+            print("cpu card greater")
+
+            cpuCardList.append(playerCard)
+            cpuCardList.append(cpuCard)
+        }
+        else{
+            print("they are equal")
+            playerCardList.append(playerCard)
+            cpuCardList.append(playerCard)
+        }
+        print("currentPlayerCards.cardList:\(playerCardList)")
+        print("currentCPUCards.cardList:\(cpuCardList)")
+    }
+    func initCards(){
+        let cardValues:[Int] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        var allCards:[Int] = []
+        for cardValue in cardValues{
+            allCards = allCards + Array(repeating:cardValue, count:4)
+            allCards = allCards.shuffled()
+        }
+        playerCardList = Array(allCards[0...25])
+        cpuCardList = Array(allCards[26...])
+        print("initial currentPlayerCards.cardList:\(playerCardList)")
+        print("initial currentCPUCards.cardList:\(cpuCardList)")
+        playerCard = playerCardList.first!
+        cpuCard = cpuCardList.first!
+    }
+        
+    
 }
 
 
@@ -67,10 +114,6 @@ struct CardView: View{
 struct currentCardsView: View{
         @ObservedObject var currentDecks:cards
         var background: Image
-        func shuffle(){
-            currentDecks.playerCardList = currentDecks.playerCardList.shuffled()
-        }
-        @State private var startPosition = 0
         var body: some View{
             let cardRows = Array(currentDecks.playerCardList).chunked(into: 6)
             ZStack{
@@ -79,7 +122,7 @@ struct currentCardsView: View{
                 VStack{
                     Spacer()
                     Button(action: {
-                        shuffle()
+                        currentDecks.shuffle()
                     }, label: {Text("SHUFFLE CARDS")
                             .font(.headline)
                             .fontWeight(.heavy)
@@ -103,14 +146,13 @@ struct currentCardsView: View{
 
     
 struct CardCompareView: View{
-    @Binding var playerCardString:String
-    @Binding var cpuCardString:String
+    @ObservedObject var currentDecks:cards
     var body: some View {
         HStack(){
             Spacer()
-            Image(playerCardString)
+            Image("card"+String(currentDecks.playerCard))
             Spacer()
-            Image(cpuCardString)
+            Image("card"+String(currentDecks.cpuCard))
             Spacer()
         }
     }
@@ -118,49 +160,9 @@ struct CardCompareView: View{
     
 struct DealButtonView: View{
     @ObservedObject var currentDecks:cards
-    @Binding var playerCard:Int
-    @Binding var cpuCard:Int
-    @Binding var playerCardString:String
-    @Binding var cpuCardString:String
-    @Binding var playerScore:Int
-    @Binding var cpuScore:Int
-    func deal(){
-        playerCard = currentDecks.playerCardList.removeFirst()
-        cpuCard = currentDecks.cpuCardList.removeFirst()
-        playerCardString = "card"+String(playerCard)
-        cpuCardString = "card"+String(cpuCard)
-    }
     var body: some View{
         Button(action: {
-            //
-            deal()
-            print("playerCard:\(playerCard)")
-            print("cpuCard:\(cpuCard)")
-
-            if playerCard>cpuCard {
-                print("player card greater")
-                currentDecks.playerCardList.append(playerCard)
-                currentDecks.playerCardList.append(cpuCard)
-
-            }
-            else if cpuCard>playerCard {
-                print("cpu card greater")
-
-                currentDecks.cpuCardList.append(playerCard)
-                currentDecks.cpuCardList.append(cpuCard)
-            }
-            else{
-                print("they are equal")
-                currentDecks.playerCardList.append(playerCard)
-                currentDecks.cpuCardList.append(playerCard)
-            }
-            playerScore=currentDecks.playerCardList.count
-            cpuScore=currentDecks.cpuCardList.count
-            print("currentPlayerCards.cardList:\(currentDecks.playerCardList)")
-            print("currentCPUCards.cardList:\(currentDecks.cpuCardList)")
-            print("playerScore:\(playerScore)")
-            print("cpuScore:\(cpuScore)")
-            //update score
+            currentDecks.deal()
         }, label: {
             Image("dealbutton")
         })
@@ -169,35 +171,9 @@ struct DealButtonView: View{
 
 struct NewGameButtonView: View{
     @ObservedObject var currentDecks:cards
-    @Binding var playerCard:Int
-    @Binding var cpuCard:Int
-    @Binding var playerCardString:String
-    @Binding var cpuCardString:String
-    @Binding var playerScore:Int
-    @Binding var cpuScore:Int
-    func initCards(){
-        let cardValues:[Int] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-        var allCards:[Int] = []
-        for cardValue in cardValues{
-            allCards = allCards + Array(repeating:cardValue, count:4)
-            allCards = allCards.shuffled()
-        }
-        currentDecks.playerCardList = Array(allCards[0...25])
-        currentDecks.cpuCardList = Array(allCards[26...])
-        print("initial currentPlayerCards.cardList:\(currentDecks.playerCardList)")
-        print("initial currentCPUCards.cardList:\(currentDecks.cpuCardList)")
-
-        playerScore = currentDecks.playerCardList.count
-        cpuScore = currentDecks.cpuCardList.count
-        playerCard = currentDecks.playerCardList.first!
-        cpuCard = currentDecks.cpuCardList.first!
-        playerCardString = "card"+String(playerCard)
-        cpuCardString = "card"+String(cpuCard)
-    }
-
     var body: some View{
     Button(action: {
-            initCards()
+        currentDecks.initCards()
         }, label: {
             Text("NEW GAME")
                 .fontWeight(.heavy)
@@ -238,28 +214,21 @@ struct scoreView: View{
 }
 
 struct GameView: View{
-    @State private var playerCard = 0
-    @State private var cpuCard = 0
-    @State private var playerCardString = "card5"
-    @State private var cpuCardString = "card9"
-    @State private var playerScore=0
-    @State private var cpuScore=0
     @ObservedObject var currentDecks:cards
-
     var body: some View {
         ZStack{
             Image("background").ignoresSafeArea()
             VStack(){
                 Image("logo")
                 Spacer()
-                CardCompareView(playerCardString: $playerCardString, cpuCardString: $cpuCardString)
-                NewGameButtonView(currentDecks: currentDecks, playerCard: $playerCard, cpuCard: $cpuCard, playerCardString: $playerCardString, cpuCardString: $cpuCardString, playerScore: $playerScore, cpuScore: $cpuScore)
+                CardCompareView(currentDecks: currentDecks)
+                NewGameButtonView(currentDecks: currentDecks)
                 NavigationLink(destination: currentCardsView(currentDecks:currentDecks, background: Image("background")), label: {
                     Text("CurrentCards")
                         .foregroundColor(Color.white)
                         .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                 })
-                DealButtonView(currentDecks: currentDecks, playerCard: $playerCard, cpuCard: $cpuCard, playerCardString: $playerCardString, cpuCardString: $cpuCardString, playerScore: $playerScore, cpuScore: $cpuScore)
+                DealButtonView(currentDecks:currentDecks)
                 Spacer()
                 scoreView(currentDecks:currentDecks)
                 Spacer()
